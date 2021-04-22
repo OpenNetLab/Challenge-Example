@@ -1,6 +1,6 @@
 # Challenge-Example
 
-This repository is an example about the submittal of challenge https://2021.acmmmsys.org/rtc_challenge.php. Its zip package(https://github.com/OpenNetLab/Challenge-Example/archive/refs/heads/master.zip) can be directly uploaded as a bandwidth estimator to OpenNetLab platform for this challenge.
+This repository is an example about the submittal of challenge https://2021.acmmmsys.org/rtc_challenge.php. Its zip package(https://github.com/OpenNetLab/Challenge-Example/archive/refs/heads/master.zip) can be directly uploaded as a bandwidth estimator to [OpenNetLab](https://opennetlab.org/) platform for this challenge.
 
 ## Challenge Manual
 
