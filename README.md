@@ -36,3 +36,23 @@ class Estimator(object):
 4. The calling frequency of `report_states` is per RTC packet.
 5. The calling frequency of `get_estimated_bandwidth` is about 200 milliseconds.
 6. You can use any built-in library of `python 3.6.9` or third-parties libraries we pre-installed in [Challenge-Environment](https://github.com/OpenNetLab/Challenge-Environment).
+
+## Submittal Verification
+
+```bash
+# Pull the docker image of challenge environment
+docker pull opennetlab.azurecr.io/challenge-env
+
+# Download the configuration and test media
+wget https://raw.githubusercontent.com/OpenNetLab/AlphaRTC/main/examples/peerconnection/serverless/corpus/receiver_pyinfer.json -O receiver_pyinfer.json
+wget https://raw.githubusercontent.com/OpenNetLab/AlphaRTC/main/examples/peerconnection/serverless/corpus/sender_pyinfer.json -O sender_pyinfer.json
+mkdir testmedia
+wget https://github.com/OpenNetLab/AlphaRTC/raw/main/examples/peerconnection/serverless/corpus/testmedia/test.wav -O testmedia/test.wav
+wget https://raw.githubusercontent.com/OpenNetLab/AlphaRTC/main/examples/peerconnection/serverless/corpus/testmedia/test.yuv -O testmedia/test.yuv
+
+# Run your example
+docker run -d --rm -v `pwd`:/app -w /app --name alphartc_pyinfer opennetlab.azurecr.io/challenge-env peerconnection_serverless receiver_pyinfer.json
+docker exec alphartc_pyinfer peerconnection_serverless sender_pyinfer.json
+```
+
+If the output video and output audio are generated at the current folder, it means your bandwidth estimator has connected to AlphaRTC successfully.
