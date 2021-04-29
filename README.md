@@ -55,4 +55,4 @@ docker run -d --rm -v `pwd`:/app -w /app --name alphartc_pyinfer opennetlab.azur
 docker exec alphartc_pyinfer peerconnection_serverless sender_pyinfer.json
 ```
 
-If the output video and output audio are generated at the current folder, it means your bandwidth estimator has connected to AlphaRTC successfully.
+If the `outvideo.yuv` and `outaudio.wav` are generated at the current folder, it means your bandwidth estimator has connected to AlphaRTC successfully.
