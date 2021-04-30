@@ -1,6 +1,6 @@
 # Challenge-Example
 
-This repository is an example about the submittal of challenge https://2021.acmmmsys.org/rtc_challenge.php. Its zip package(https://github.com/OpenNetLab/Challenge-Example/archive/refs/heads/master.zip) can be directly uploaded as a bandwidth estimator to [OpenNetLab](https://opennetlab.org/) platform for this challenge.
+This repository is an example about the submission of challenge https://2021.acmmmsys.org/rtc_challenge.php. Its zip package(https://github.com/OpenNetLab/Challenge-Example/archive/refs/heads/master.zip) can be directly uploaded as a bandwidth estimator to [OpenNetLab](https://opennetlab.org/) platform for this challenge.
 
 ## Challenge Manual
 
@@ -37,7 +37,7 @@ class Estimator(object):
 5. The calling frequency of `get_estimated_bandwidth` is about 200 milliseconds.
 6. You can use any built-in library of `python 3.6.9` or third-parties libraries we pre-installed in [Challenge-Environment](https://github.com/OpenNetLab/Challenge-Environment).
 
-## Submittal Verification
+## Submission Verification
 
 ```bash
 # Pull the docker image of challenge environment
