@@ -18,6 +18,15 @@ steps:
 
 - checkout: self
 
+- script: |
+    sudo apt install -y python3 python3-pip
+    python3 -m pip install torch pytest
+  displayName: "Install runtime dependencies"
+
+- script: |
+    python3 -m pytest tests
+  displayName: "Run test"
+
 - script: docker pull opennetlab.azurecr.io/challenge-env
   displayName: 'Get challenge environment'
 
