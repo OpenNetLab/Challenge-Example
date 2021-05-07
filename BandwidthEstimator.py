@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import onnx, torch, onnxruntime
+import torch
 import numpy as np
 from utils.packet_info import PacketInfo
 from utils.packet_record import PacketRecord
 from deep_rl.actor_critic import ActorCritic
-import torch
 
 
 UNIT_M = 1000000
@@ -30,15 +29,17 @@ def log_to_linear(value):
 
 
 class Estimator(object):
-    def __init__(self, model_path, step_time=60):
+    def __init__(self, model_path="./model/pretrained_model.pth", step_time=60):
+        # model parameters
         state_dim = 4
         action_dim = 1
-        exploration_param = 0.05    # the std var of action distribution
+        # the std var of action distribution
+        exploration_param = 0.05
         # load model
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model = ActorCritic(state_dim, action_dim, exploration_param, self.device).to(self.device)
         self.model.load_state_dict(torch.load(model_path))
-
+        # the model to get the input of model
         self.packet_record = PacketRecord()
         self.packet_record.reset()
         self.bandwidth_prediction = 1e6
@@ -58,6 +59,7 @@ class Estimator(object):
             "payload_size": uint
         }
         '''
+        # clear data
         packet_info = PacketInfo()
         packet_info.payload_type = stats["payload_type"]
         packet_info.ssrc = stats["ssrc"]
@@ -81,56 +83,13 @@ class Estimator(object):
         states.append(loss_ratio)
         latest_prediction = self.packet_record.calculate_latest_prediction()
         states.append(liner_to_log(latest_prediction))
-
+        # make the states for model
         torch_tensor_states = torch.Tensor(states)
-        # onnx_input = {self.model.get_inputs()[0].name : torch_tensor_states}
-        print(torch_tensor_states)
+        # get model output
         action, action_logprobs, value = self.model.forward(torch_tensor_states)
-        print(action, action_logprobs, value)
-        # self.bandwidth_prediction = liner_to_log(action)
+        # update prediction of bandwidth by using action
         self.bandwidth_prediction = log_to_linear(action)
 
     def get_estimated_bandwidth(self)->int:
 
         return self.bandwidth_prediction
-
-
-
-def test_torch_model(model_path):
-    lr = 3e-5                 # Adam parameters
-    betas = (0.9, 0.999)
-    state_dim = 4
-    action_dim = 1
-    exploration_param = 0.05    # the std var of action distribution
-    K_epochs = 37               # update policy for K_epochs
-    ppo_clip = 0.2              # clip parameter of PPO
-    gamma = 0.99                # discount factor
-
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    policy = ActorCritic(state_dim, action_dim, exploration_param, device).to(device)
-    policy.load_state_dict(torch.load(model_path))
-
-    state = np.array([[0.5, 0.2, 0.3, 0.4]])
-    state = torch.FloatTensor(state.reshape(1, -1)).to(device)
-    action, action_logprobs, value = policy.forward(state)
-    print(action)
-
-
-if __name__ == "__main__":
-    model_path = "./pretrained_model.pth"
-    BWE = Estimator(model_path)
-    states = {
-            "send_time_ms": 100,
-            "arrival_time_ms": 400,
-            "payload_type": 125,
-            "sequence_number": 10,
-            "ssrc": 123,
-            "padding_length": 0,
-            "header_length": 120,
-            "payload_size": 1350
-        }
-    print(BWE.get_estimated_bandwidth())
-    print(BWE.report_states(states))
-    print(BWE.get_estimated_bandwidth())
-    
-    # test_torch_model(model_path)
