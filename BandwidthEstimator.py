@@ -42,8 +42,13 @@ class Estimator(object):
         # the model to get the input of model
         self.packet_record = PacketRecord()
         self.packet_record.reset()
-        self.bandwidth_prediction = 1e6
         self.step_time = step_time
+        # init
+        states = [0.0, 0.0, 0.0, 0.0]
+        torch_tensor_states = torch.FloatTensor(torch.Tensor(states).reshape(1, -1)).to(self.device)
+        action, action_logprobs, value = self.model.forward(torch_tensor_states)
+        self.bandwidth_prediction = log_to_linear(action)
+        self.last_call = "init"
 
     def report_states(self, stats: dict):
         '''
@@ -59,6 +64,7 @@ class Estimator(object):
             "payload_size": uint
         }
         '''
+        self.last_call = "report_states"
         # clear data
         packet_info = PacketInfo()
         packet_info.payload_type = stats["payload_type"]
@@ -73,23 +79,24 @@ class Estimator(object):
 
         self.packet_record.on_receive(packet_info)
 
-        # calculate state
-        states = []
-        receiving_rate = self.packet_record.calculate_receiving_rate(interval=self.step_time)
-        states.append(liner_to_log(receiving_rate))
-        delay = self.packet_record.calculate_average_delay(interval=self.step_time)
-        states.append(min(delay/1000, 1))
-        loss_ratio = self.packet_record.calculate_loss_ratio(interval=self.step_time)
-        states.append(loss_ratio)
-        latest_prediction = self.packet_record.calculate_latest_prediction()
-        states.append(liner_to_log(latest_prediction))
-        # make the states for model
-        torch_tensor_states = torch.Tensor(states)
-        # get model output
-        action, action_logprobs, value = self.model.forward(torch_tensor_states)
-        # update prediction of bandwidth by using action
-        self.bandwidth_prediction = log_to_linear(action)
-
     def get_estimated_bandwidth(self)->int:
+        if self.last_call and self.last_call == "report_states":
+            self.last_call = "get_estimated_bandwidth"
+            # calculate state
+            states = []
+            receiving_rate = self.packet_record.calculate_receiving_rate(interval=self.step_time)
+            states.append(liner_to_log(receiving_rate))
+            delay = self.packet_record.calculate_average_delay(interval=self.step_time)
+            states.append(min(delay/1000, 1))
+            loss_ratio = self.packet_record.calculate_loss_ratio(interval=self.step_time)
+            states.append(loss_ratio)
+            latest_prediction = self.packet_record.calculate_latest_prediction()
+            states.append(liner_to_log(latest_prediction))
+            # make the states for model
+            torch_tensor_states = torch.FloatTensor(torch.Tensor(states).reshape(1, -1)).to(self.device)
+            # get model output
+            action, action_logprobs, value = self.model.forward(torch_tensor_states)
+            # update prediction of bandwidth by using action
+            self.bandwidth_prediction = log_to_linear(action)
 
         return self.bandwidth_prediction
