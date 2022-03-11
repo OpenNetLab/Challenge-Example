@@ -51,7 +51,7 @@ wget https://github.com/OpenNetLab/AlphaRTC/raw/main/examples/peerconnection/ser
 wget https://raw.githubusercontent.com/OpenNetLab/AlphaRTC/main/examples/peerconnection/serverless/corpus/testmedia/test.yuv -O testmedia/test.yuv
 
 # Run your example locally
-docker run -d --rm -v `pwd`:/app -w /app --name alphartc_pyinfer opennetlab.azurecr.io/challenge-env peerconnection_serverless receiver_pyinfer.json
+docker run -d --network=host --rm -v `pwd`:/app -w /app --name alphartc_pyinfer opennetlab.azurecr.io/challenge-env peerconnection_serverless receiver_pyinfer.json
 docker exec alphartc_pyinfer peerconnection_serverless sender_pyinfer.json
 ```
 
@@ -73,8 +73,8 @@ Then modify the `sender_pyinfer.json` in sender machine, change "dest_ip" to rec
 Then run the following command, and check if the `outvideo.yuv` and `outaudio.wav` are generated at the receiver machine.
 ```bash
 # receiver
-docker run -d --net==host --rm -v  `pwd`:/app -w /app --name alphartc_pyinfer opennetlab.azurecr.io/challenge-env peerconnection_serverless receiver_pyinfer.json
+docker run -d --network=host --rm -v  `pwd`:/app -w /app --name alphartc_pyinfer opennetlab.azurecr.io/challenge-env peerconnection_serverless receiver_pyinfer.json
 
 # sender
-docker run -d --net==host --rm -v  `pwd`:/app -w /app --name alphartc_pyinfer opennetlab.azurecr.io/challenge-env peerconnection_serverless sender_pyinfer.json
+docker run -d --network=host --rm -v  `pwd`:/app -w /app --name alphartc_pyinfer opennetlab.azurecr.io/challenge-env peerconnection_serverless sender_pyinfer.json
 ```
